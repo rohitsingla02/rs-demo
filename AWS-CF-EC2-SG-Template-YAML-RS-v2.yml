@@ -9,4 +9,4 @@ Resources:
       SecurityGroups: sg-0bee687735f5ada3c
       KeyName: packer-infy-key
       ImageId: ami-0080e4c5bc078760e
-      Subnet: subnet-4db9b163
+      SubnetId: subnet-4db9b163
