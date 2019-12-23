@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  AWS CloudFormation Sample Template. Create an Amazon EC2 instance running the base Amazon Linux AMI using hardcode values.
+Parameters:
+  KeyName:
+    Description: Key Pair name
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+Resources:
+  EC2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: t2.small
+      SourceSecurityGroupId: sg-0bee687735f5ada3c
+      KeyName: packer-infy-key
+      ImageId: amzn-ami-hvm-2018.03.0.20181129-x86_64-gp2 
+      VpcId: vpc-2d550c57
+      SubnetId: subnet-4db9b163
