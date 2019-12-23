@@ -6,7 +6,7 @@ Resources:
     Type: 'AWS::EC2::Instance'
     Properties:
       InstanceType: t2.small
-      SourceSecurityGroupId: sg-0bee687735f5ada3c
+      GroupId: sg-0bee687735f5ada3c
       KeyName: packer-infy-key
       ImageId: ami-0080e4c5bc078760e
       SubnetId: subnet-4db9b163
