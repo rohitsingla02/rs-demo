@@ -9,5 +9,5 @@ Resources:
       SourceSecurityGroupId: sg-0bee687735f5ada3c
       KeyName: packer-infy-key
       ImageId: ami-0080e4c5bc078760e
-      VpcId: vpc-2d550c57
+      VPC: vpc-2d550c57
       SubnetId: subnet-4db9b163
