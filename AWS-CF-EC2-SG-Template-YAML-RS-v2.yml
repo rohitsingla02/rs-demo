@@ -1,10 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   AWS CloudFormation Sample Template. Create an Amazon EC2 instance running the base Amazon Linux AMI using hardcode values.
-Parameters:
-  MySecurityGroup:
-    Type: sg-0bee687735f5ada3c
-    Description: ID of an existing VPC security group (sg-xxxxxx)
 Resources:
   EC2Instance:
     Type: 'AWS::EC2::Instance'
@@ -13,5 +9,4 @@ Resources:
       KeyName: packer-infy-key
       AMI: ami-0080e4c5bc078760e
       SubnetId: subnet-4db9b163
-      SecurityGroupIds:
-        - !Ref MySecurityGroup
+      SecurityGroupIds: sg-0bee687735f5ada3c
