@@ -7,6 +7,6 @@ Resources:
     Properties:
       InstanceType: t2.small
       KeyName: packer-infy-key
-      AMI: ami-0080e4c5bc078760e
+      ImageId: ami-0080e4c5bc078760e
       SubnetId: subnet-4db9b163
       SecurityGroupIds: sg-0bee687735f5ada3c
