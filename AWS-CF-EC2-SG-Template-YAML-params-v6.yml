@@ -17,14 +17,16 @@ Parameters:
       - t2.medium	  
   AvailabilityZone:
     Description: WebServer EC2 AZ
-    Type: AWS::EC2::AvailabilityZone::Name
+    Type: String
+#    Type: AWS::EC2::AvailabilityZone::Name
     Default: us-east-1b
     AllowedValues:
       - us-east-1a
       - us-east-1b
   KeyName:
     Description: Provide Existing key name.
-    Type: AWS::EC2::KeyPair::KeyName
+    Type: String
+#    Type: AWS::EC2::KeyPair::KeyName
     Default: packer-infy-key
   Tags: 
     Type: String
@@ -33,7 +35,8 @@ Parameters:
        Key: Name
        Value: cf-stack-webserver1	  
   SecurityGroupIds:
-    Type: AWS::EC2::SecurityGroup::Id
+    Type: String
+#    Type: AWS::EC2::SecurityGroup::Id
     Default:
       - sg-0bee687735f5ada3c
 Resources:
