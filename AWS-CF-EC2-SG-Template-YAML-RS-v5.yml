@@ -16,7 +16,6 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: !Ref InstanceType
-      VpcId: vpc-2d550c57
       AvailabilityZone: us-east-1b
       ImageId: ami-0080e4c5bc078760e
       KeyName: packer-infy-key
