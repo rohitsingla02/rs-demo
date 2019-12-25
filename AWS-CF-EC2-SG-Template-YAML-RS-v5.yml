@@ -21,7 +21,6 @@ Resources:
       KeyName: packer-infy-key
       SecurityGroupIds:
         - sg-0bee687735f5ada3c
-      SubnetId: subnet-4db9b163
       Tags:
         -
           Key: Name
