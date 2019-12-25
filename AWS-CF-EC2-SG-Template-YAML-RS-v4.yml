@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"  
-Resources:  
+Resources:
   WebInstance:
     Type: AWS::EC2::Instance
     Properties:
@@ -9,3 +9,7 @@ Resources:
       SecurityGroupIds:
         - sg-0bee687735f5ada3c
       SubnetId: subnet-4db9b163
+      Tags:
+        -
+          Key: Name
+          Value: cf-stack-webserver
