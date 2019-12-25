@@ -27,6 +27,7 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     Default: packer-infy-key
   Tags: 
+    Type: String
     Default:
       - 
        Key: Name
