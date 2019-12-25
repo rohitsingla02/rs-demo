@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: "2010-09-09"  
+Description: >-
+  Created AWS CF template in .yaml format for spinning up an EC2 instance with linux base image and take either t2.nano or t2.small type instance. Hardcode and later parameterize Availability Zone, VPC , Security ID values from the existing EC2 instance.
+Parameters:
+  ImageId:
+    Description: WebServer EC2 instance typeProvide base AMI or Packer AMI reference
+    Type: String
+    Default: ami-0080e4c5bc078760e
+  InstanceType:
+    Description: WebServer EC2 instance type
+    Type: String
+    Default: t2.small
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium	  
+  AvailabilityZone:
+    Description: WebServer EC2 AZ
+    Type: String
+    Default: us-east-1b
+    AllowedValues:
+      - us-east-1a
+      - us-east-1b
+  KeyName:
+    Description: Provide Existing key name.
+    Type: String
+    Default: packer-infy-key
+  Tags: 
+    - 
+      Key: Name
+      Value: cf-stack-webserver1
+  SecurityGroupIds:
+    - 
+      sg-0bee687735f5ada3c
+Resources:
+  WebInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      AvailabilityZone: !Ref AvailabilityZone
+      KeyName: !Ref KeyName
+      Tags:
+        - !Ref Tags
+      SecurityGroupIds:
+        - !Ref SecurityGroupIds
