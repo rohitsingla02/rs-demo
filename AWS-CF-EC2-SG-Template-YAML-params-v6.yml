@@ -4,7 +4,7 @@ Description: >-
 Parameters:
   ImageId:
     Description: WebServer EC2 instance typeProvide base AMI or Packer AMI reference
-    Type: String
+    Type: AWS::EC2::Image::Id
     Default: ami-0080e4c5bc078760e
   InstanceType:
     Description: WebServer EC2 instance type
@@ -17,22 +17,22 @@ Parameters:
       - t2.medium	  
   AvailabilityZone:
     Description: WebServer EC2 AZ
-    Type: String
+    Type: AWS::EC2::AvailabilityZone::Name
     Default: us-east-1b
     AllowedValues:
       - us-east-1a
       - us-east-1b
   KeyName:
     Description: Provide Existing key name.
-    Type: String
+    Type: AWS::EC2::KeyPair::KeyName
     Default: packer-infy-key
   Tags: 
     - 
       Key: Name
       Value: cf-stack-webserver1
   SecurityGroupIds:
-    - 
-      sg-0bee687735f5ada3c
+    Type: AWS::EC2::SecurityGroup::Id
+    - sg-0bee687735f5ada3c
 Resources:
   WebInstance:
     Type: AWS::EC2::Instance
