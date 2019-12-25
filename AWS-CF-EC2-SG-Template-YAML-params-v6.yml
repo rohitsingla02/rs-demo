@@ -27,12 +27,14 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     Default: packer-infy-key
   Tags: 
-    - 
-      Key: Name
-      Value: cf-stack-webserver1
+    Default:
+      - 
+       Key: Name
+       Value: cf-stack-webserver1	  
   SecurityGroupIds:
     Type: AWS::EC2::SecurityGroup::Id
-    - sg-0bee687735f5ada3c
+    Default:
+      - sg-0bee687735f5ada3c
 Resources:
   WebInstance:
     Type: AWS::EC2::Instance
