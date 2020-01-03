@@ -1,22 +1,23 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
-  Created AWS CF template in .yaml format for spinning up an EC2 instance with linux base image and take either t2.nano or t2.small type instance. Hardcode and later parameterize Availability Zone, VPC , Security ID values from the existing EC2 instance.
+  Business Usecase- CF will use Packer AMI to provision infra - the AWS resources i.e EC2/ELB/ASG. Entire process of Infrastructure build will be orchestrated through the Jenkins. 
+  This automation will take care of setting up security groups, policies. Technical description- Jenkins job will trigger the AWS CF template in.yaml format placed in GitHub. It will automatically orchestrate the infra provisioning.
 Parameters:
   ImageId:
-    Description: WebServer EC2 instance typeProvide base AMI or Packer AMI reference
+    Description: EC2 instance type..Provide base AMI or Packer AMI reference
     Type: AWS::EC2::Image::Id
     Default: ami-0080e4c5bc078760e
   InstanceType:
-    Description: WebServer EC2 instance type
+    Description:  EC2 instance type
     Type: String
     Default: t2.small
     AllowedValues:
       - t2.nano
       - t2.micro
-      - t2.small
+      - t2.small 
       - t2.medium	  
   AvailabilityZone:
-    Description: WebServer EC2 AZ
+    Description: EC2 Availability Zone
     Type: AWS::EC2::AvailabilityZone::Name
     Default: us-east-1c
     AllowedValues:
@@ -24,7 +25,7 @@ Parameters:
       - us-east-1b
       - us-east-1c	  
   KeyName:
-    Description: Provide Existing key name.
+    Description: Provide Existing keypair name.
     Type: AWS::EC2::KeyPair::KeyName
     Default: packer-infy-key
   SSHLocation:
@@ -38,17 +39,19 @@ Parameters:
   SecurityGroupIds:
     Type: AWS::EC2::SecurityGroup::Id
     Default: sg-0bee687735f5ada3c
+    
 Resources:
-#  WebInstanceGroup: Creating Autoscaling group in specific AZ, with minimum instances/servers as 2, max 4 and desired as 3. Provided reference with launch config and ELB.
-  WebInstanceGroup:
+#  InstanceGroup: ASG automatically spins up desired capacity of EC2 instances with defined launch configuration. 
+#  Create Autoscaling group in specific AZ, with minimum instances/servers as 2, max 4 and desired as 3. Launch configuration is provided and ELB is attached.
+  InstanceGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       AvailabilityZones:
         - "us-east-1c"
       LaunchConfigurationName: !Ref 'LaunchConfig'
-      MinSize: '2'
-      MaxSize: '4'
-      DesiredCapacity: '3'
+      MinSize: '1'
+      MaxSize: '3'
+      DesiredCapacity: '2'
       LoadBalancerNames: [!Ref 'MyLoadBalancerTest']
     CreationPolicy:
       ResourceSignal:
@@ -63,20 +66,24 @@ Resources:
       InstanceType: !Ref InstanceType
       AvailabilityZone: !Ref AvailabilityZone
       KeyName: !Ref KeyName
-  WebServerScaleUpPolicy:
+      
+#  ServerScaleUpPolicy and ServerScaleDownPolicy: This will scale-out(increase) or scale-in(decrease) EC2 instances/servers based on defined scaling policies referring to CPU threshold usage.
+  ServerScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
       AdjustmentType: ChangeInCapacity
-      AutoScalingGroupName: !Ref 'WebInstanceGroup'
+      AutoScalingGroupName: !Ref 'InstanceGroup'
       Cooldown: '60'
       ScalingAdjustment: 1
-  WebServerScaleDownPolicy:
+      
+  ServerScaleDownPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
       AdjustmentType: ChangeInCapacity
-      AutoScalingGroupName: !Ref 'WebInstanceGroup'
+      AutoScalingGroupName: !Ref 'InstanceGroup'
       Cooldown: '60'
       ScalingAdjustment: -1
+      
   CPUAlarmHigh:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -87,26 +94,28 @@ Resources:
       Period: 120
       EvaluationPeriods: 1
       Threshold: 70
-      AlarmActions: [!Ref 'WebServerScaleUpPolicy']
+      AlarmActions: [!Ref 'ServerScaleUpPolicy']
       Dimensions:
       - Name: AutoScalingGroupName
-        Value: !Ref 'WebInstanceGroup'
+        Value: !Ref 'InstanceGroup'
       ComparisonOperator: GreaterThanThreshold
+      
   CPUAlarmLow:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: Scale-down if CPU < 40% for 2 minutes
+      AlarmDescription: Scale-down if CPU < 30% for 2 minutes
       MetricName: CPUUtilization
       Namespace: AWS/EC2
       Statistic: Average
       Period: 120
       EvaluationPeriods: 1
-      Threshold: 40
-      AlarmActions: [!Ref 'WebServerScaleDownPolicy']
+      Threshold: 30
+      AlarmActions: [!Ref 'ServerScaleDownPolicy']
       Dimensions:
       - Name: AutoScalingGroupName
-        Value: !Ref 'WebInstanceGroup'
-      ComparisonOperator: LessThanThreshold  
+        Value: !Ref 'InstanceGroup'
+      ComparisonOperator: LessThanThreshold
+      
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Metadata:
@@ -120,8 +129,8 @@ Resources:
             /var/www/html/index.html:
               content: !Join ['
 
-                  ', [<'<h1>Congratulations, you have successfully launched
-                    the AWS CloudFormation sample.</h1>']]
+                  ', [<'<h1>Congratulations!!! You have Successfully launched 
+                    the AWS CloudFormation Sample.</h1>']]
               mode: '000644'
               owner: root
               group: root
@@ -148,10 +157,12 @@ Resources:
           '
 
             ', '/opt/aws/bin/cfn-signal -e $? ', '         --stack ', !Ref 'AWS::StackName',
-          '         --resource WebInstanceGroup ', '         --region ', !Ref 'AWS::Region',
+          '         --resource InstanceGroup ', '         --region ', !Ref 'AWS::Region',
           '
 
             ']
+# ELB- On-the-fly, Elastic load balancer will be created and attached to ASG EC2 instances. 
+# ELB DNS will be available to end-user and will not expose the application server (Ec2 servers) directly. ELB will monitor health of the instances based on defined checks			
   MyLoadBalancerTest:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
@@ -173,6 +184,7 @@ Resources:
       ConnectionDrainingPolicy:
           Enabled: 'true'
           Timeout: '300'
+          
   LBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
