@@ -54,9 +54,6 @@ Resources:
       MaxSize: '3'
       DesiredCapacity: '2'
       LoadBalancerNames: [!Ref 'MyLoadBalancerTest']
-#    CreationPolicy:
-#      ResourceSignal:
-#        Timeout: PT15M
     UpdatePolicy:
       AutoScalingRollingUpdate:
         MinInstancesInService: '1'
@@ -118,49 +115,12 @@ Resources:
       
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
-#    Metadata:
-#      Comment: Install a simple application
-#      AWS::CloudFormation::Init:
-#        config:
-#          packages:
-#            yum:
-#              httpd: []
-#          files:
-#            /var/www/html/index.html:
-#              content: !Join ['
-#
-#                  ', [<'<h1>Congratulations!!! You have Successfully launched 
-#                    the AWS CloudFormation Sample.</h1>']]
-#              mode: '000644'
-#              owner: root
-#              group: root
-#          services:
-#            sysvinit:
-#              httpd:
-#                enabled: true
-#                ensureRunning: true
     Properties:
       KeyName: !Ref 'KeyName'
       ImageId: !Ref ImageId
       InstanceType: !Ref 'InstanceType'
       SecurityGroups:
         - !Ref SecurityGroupIds  
-#      UserData: !Base64
-#        Fn::Join:
-#        - ''
-#        - ['#!/bin/bash -xe
-#
-#            ', 'yum update -y aws-cfn-bootstrap
-#
-#            ', '/opt/aws/bin/cfn-init -v ', '         --stack ', !Ref 'AWS::StackName',
-#          '         --resource LaunchConfig ', '         --region ', !Ref 'AWS::Region',
-#          '
-#
-#            ', '/opt/aws/bin/cfn-signal -e $? ', '         --stack ', !Ref 'AWS::StackName',
-#          '         --resource InstanceGroup ', '         --region ', !Ref 'AWS::Region',
-#          '
-#
-#            ']
 # ELB- On-the-fly, Elastic load balancer will be created and attached to ASG EC2 instances. 
 # ELB DNS will be available to end-user and will not expose the application server (Ec2 servers) directly. ELB will monitor health of the instances based on defined checks			
   MyLoadBalancerTest:
