@@ -3,11 +3,13 @@ Description: >-
   Business Usecase- CF will use Packer AMI to provision infra - the AWS resources i.e EC2/ELB/ASG. Entire process of Infrastructure build will be orchestrated through the Jenkins. 
   This automation will take care of setting up security groups, policies. Technical description- Jenkins job will trigger the AWS CF template in.yaml format placed in GitHub. It will automatically orchestrate the infra provisioning.
 Parameters:
-#Private AMI Apache created by Packer-Jenkins RS- ami-01d5e2b8a2894923b
+#Using Jenkins-Packer created private AMI ID with Apache installed
   ImageId:
     Description: EC2 instance type..Provide base AMI or Packer AMI reference
-    Type: AWS::EC2::Image::Id
-    Default: ami-01d5e2b8a2894923b
+#    Type: AWS::EC2::Image::Id
+#    Default: ami-01d5e2b8a2894923b
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: packer-apache-ami-id
   InstanceType:
     Description:  EC2 instance type
     Type: String
@@ -29,18 +31,10 @@ Parameters:
     Description: Provide Existing keypair name.
     Type: AWS::EC2::KeyPair::KeyName
     Default: packer-infy-key
-  SSHLocation:
-    Description: The IP address range that can be used to SSH to the EC2 instances
-    Type: String
-    MinLength: '9'
-    MaxLength: '18'
-    Default: 0.0.0.0/0
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.	
   SecurityGroupIds:
     Type: AWS::EC2::SecurityGroup::Id
     Default: sg-0bee687735f5ada3c
-    
+   
 Resources:
 #  InstanceGroup: ASG automatically spins up desired capacity of EC2 instances with defined launch configuration. 
 #  Create Autoscaling group in specific AZ, with minimum instances/servers as 2, max 4 and desired as 3. Launch configuration is provided and ELB is attached.
@@ -120,7 +114,7 @@ Resources:
       ImageId: !Ref ImageId
       InstanceType: !Ref 'InstanceType'
       SecurityGroups:
-        - !Ref SecurityGroupIds  
+        - !Ref SecurityGroupIds
 # ELB- On-the-fly, Elastic load balancer will be created and attached to ASG EC2 instances. 
 # ELB DNS will be available to end-user and will not expose the application server (Ec2 servers) directly. ELB will monitor health of the instances based on defined checks			
   MyLoadBalancerTest:
@@ -153,7 +147,7 @@ Resources:
       - IpProtocol: tcp
         FromPort: '22'
         ToPort: '22'
-        CidrIp: !Ref 'SSHLocation'
+        CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
         FromPort: '80'
         ToPort: '80'
