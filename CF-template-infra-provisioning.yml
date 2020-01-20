@@ -6,8 +6,6 @@ Parameters:
 #Using Jenkins-Packer created private AMI ID with Apache installed
   ImageId:
     Description: EC2 instance type..Provide base AMI or Packer AMI reference
-#    Type: AWS::EC2::Image::Id
-#    Default: ami-01d5e2b8a2894923b
     Type: AWS::SSM::Parameter::Value<String>
     Default: packer-apache-ami-id
   InstanceType:
