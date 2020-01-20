@@ -39,23 +39,18 @@ Resources:
   InstanceGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
+      Tags:
+        -
+          Key: Name
+          PropagateAtLaunch: true		  
+          Value: poc-instances	    
       AvailabilityZones:
         - "us-east-1c"
       LaunchConfigurationName: !Ref 'LaunchConfig'
       MinSize: '1'
       MaxSize: '3'
       DesiredCapacity: '2'
-      LoadBalancerNames: [!Ref 'MyLoadBalancerTest']
-    UpdatePolicy:
-      AutoScalingRollingUpdate:
-        MinInstancesInService: '1'
-        MaxBatchSize: '1'
-        PauseTime: PT15M
-        WaitOnResourceSignals: 'true'  
-      ImageId: !Ref ImageId
-      InstanceType: !Ref InstanceType
-      AvailabilityZone: !Ref AvailabilityZone
-      KeyName: !Ref KeyName
+      LoadBalancerNames: [!Ref 'LoadBalancer']
 #  ServerScaleUpPolicy and ServerScaleDownPolicy: This will scale-out(increase) or scale-in(decrease) EC2 instances/servers based on defined scaling policies referring to CPU threshold usage.
   ServerScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
@@ -115,7 +110,7 @@ Resources:
         - !Ref SecurityGroupIds
 # ELB- On-the-fly, Elastic load balancer will be created and attached to ASG EC2 instances. 
 # ELB DNS will be available to end-user and will not expose the application server (Ec2 servers) directly. ELB will monitor health of the instances based on defined checks			
-  MyLoadBalancerTest:
+  LoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
       AvailabilityZones:
