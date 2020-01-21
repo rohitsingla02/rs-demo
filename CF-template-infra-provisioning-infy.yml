@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Business Usecase- CF will use Packer AMI to provision infra - the AWS resources i.e EC2/ELB/ASG. Entire process of Infrastructure build will be orchestrated through the Jenkins. 
+  This automation will take care of setting up security groups, policies. Technical description- Jenkins job will trigger the AWS CF template in.yaml format placed in GitHub. It will automatically orchestrate the infra provisioning.
+ #VPC ID vpc-05673efa44d239ff9 subnet-0e3ccdbf93fc92e10
+Parameters:
+#Using Jenkins-Packer created private AMI ID with Apache installed
+  ImageId:
+    Description: EC2 instance type..Provide base AMI or Packer AMI reference
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: '/charter/test/ami-id'
+#included IAM per EC2-launch-infy.yml
+  IamInstanceProfile:
+    Description:  IamInstanceProfile Name
+    Type: String
+    Default: Role-EC2-S3ReadAccess
+  InstanceType:
+    Description:  EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small 
+      - t2.medium	  
+  AvailabilityZone:
+    Description: EC2 Availability Zone
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-east-1b
+    AllowedValues:
+      - us-east-1a
+      - us-east-1b
+      - us-east-1c	  
+  KeyName:
+    Description: Provide Existing keypair name.
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: KEY03-PPCAWS053-TEMP
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Default: CLB-Charter-App-Deployment
+  SecurityGroupIds:
+    Type: AWS::EC2::SecurityGroup::Id
+    Default: sg-0665ceccdfc1300a9
+   
+Resources:
+#  InstanceGroup: ASG automatically spins up desired capacity of EC2 instances with defined launch configuration. 
+#  Create Autoscaling group in specific AZ, with minimum instances/servers as 2, max 4 and desired as 3. Launch configuration is provided and ELB is attached.
+  InstanceGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      SubnetId: subnet-0e3ccdbf93fc92e10
+      Tags:
+        -
+          Key: Name
+          Value: !Ref Tags
+          Value: poc-instances	    
+      AvailabilityZones:
+        - "us-east-1c"
+      LaunchConfigurationName: !Ref 'LaunchConfig'
+      MinSize: '1'
+      MaxSize: '3'
+      DesiredCapacity: '2'
+      LoadBalancerNames: [!Ref 'LoadBalancer']
+#  ServerScaleUpPolicy and ServerScaleDownPolicy: This will scale-out(increase) or scale-in(decrease) EC2 instances/servers based on defined scaling policies referring to CPU threshold usage.
+  ServerScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref 'InstanceGroup'
+      Cooldown: '60'
+      ScalingAdjustment: 1
+      
+  ServerScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref 'InstanceGroup'
+      Cooldown: '60'
+      ScalingAdjustment: -1
+      
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-up if CPU > 70% for 2 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 120
+      EvaluationPeriods: 1
+      Threshold: 70
+      AlarmActions: [!Ref 'ServerScaleUpPolicy']
+      Dimensions:
+      - Name: AutoScalingGroupName
+        Value: !Ref 'InstanceGroup'
+      ComparisonOperator: GreaterThanThreshold
+      
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-down if CPU < 30% for 2 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 120
+      EvaluationPeriods: 1
+      Threshold: 30
+      AlarmActions: [!Ref 'ServerScaleDownPolicy']
+      Dimensions:
+      - Name: AutoScalingGroupName
+        Value: !Ref 'InstanceGroup'
+      ComparisonOperator: LessThanThreshold
+      
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      KeyName: !Ref 'KeyName'
+      ImageId: !Ref ImageId
+      InstanceType: !Ref 'InstanceType'
+      IamInstanceProfile: !Ref IamInstanceProfile
+      SecurityGroups:
+        - !Ref SecurityGroupIds
