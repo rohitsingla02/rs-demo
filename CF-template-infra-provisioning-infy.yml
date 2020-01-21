@@ -36,7 +36,7 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     Default: KEY03-PPCAWS053-TEMP
   LoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Type: AWS::ElasticLoadBalancing::LoadBalancer::LoadBalancerName
     Default: CLB-Charter-App-Deployment
   SecurityGroupIds:
     Type: AWS::EC2::SecurityGroup::Id
