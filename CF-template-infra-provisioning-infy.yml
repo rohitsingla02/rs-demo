@@ -2,13 +2,17 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
   Business Usecase- CF will use Packer AMI to provision infra - the AWS resources i.e EC2/ELB/ASG. Entire process of Infrastructure build will be orchestrated through the Jenkins. 
   This automation will take care of setting up security groups, policies. Technical description- Jenkins job will trigger the AWS CF template in.yaml format placed in GitHub. It will automatically orchestrate the infra provisioning.
- #VPC ID vpc-05673efa44d239ff9 subnet-0e3ccdbf93fc92e10
+ #VPC ID vpc-05673efa44d239ff9 subnet-0e3ccdbf93fc92e10 cf-stack-jenkins-1008
 Parameters:
 #Using Jenkins-Packer created private AMI ID with Apache installed
   ImageId:
     Description: EC2 instance type..Provide base AMI or Packer AMI reference
     Type: AWS::SSM::Parameter::Value<String>
     Default: '/charter/test/ami-id'
+  LoadBalancer:
+    Description: Provide existing LB name
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: existing-load-balancer
 #included IAM per EC2-launch-infy.yml
   IamInstanceProfile:
     Description:  IamInstanceProfile Name
@@ -35,27 +39,24 @@ Parameters:
     Description: Provide Existing keypair name.
     Type: AWS::EC2::KeyPair::KeyName
     Default: KEY03-PPCAWS053-TEMP
-  LoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer::LoadBalancerName
-    Default: CLB-Charter-App-Deployment
   SecurityGroupIds:
     Type: AWS::EC2::SecurityGroup::Id
     Default: sg-0665ceccdfc1300a9
-   
+
 Resources:
 #  InstanceGroup: ASG automatically spins up desired capacity of EC2 instances with defined launch configuration. 
-#  Create Autoscaling group in specific AZ, with minimum instances/servers as 2, max 4 and desired as 3. Launch configuration is provided and ELB is attached.
+#  Create Autoscaling group in specific AZ, with minimum instances/servers as 2, max 4 and desired as 3. Launch configuration is provided and ELB is attached. 
   InstanceGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      SubnetId: subnet-0e3ccdbf93fc92e10
       Tags:
         -
           Key: Name
-          Value: !Ref Tags
+          PropagateAtLaunch: true
           Value: poc-instances	    
-      AvailabilityZones:
-        - "us-east-1c"
+      VPCZoneIdentifier:
+        - subnet-0e3ccdbf93fc92e10
+        - subnet-0e3ccdbf93fc92e10
       LaunchConfigurationName: !Ref 'LaunchConfig'
       MinSize: '1'
       MaxSize: '3'
