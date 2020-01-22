@@ -10,11 +10,8 @@
       "region": "us-east-1",
       "source_ami": "ami-0080e4c5bc078760e",
       "instance_type": "t2.micro",
-      "vpc_id": "vpc-05673efa44d239ff9",
-      "subnet_id": "subnet-03854b5a5df09c8da",
       "ssh_username": "ec2-user",
-      "ami_name": "apache-ami-packer-{{timestamp}}",
-      "name": "apache-ami"
+      "ami_name": "apache-ami-packer-{{timestamp}}"
     }
   ],
   "provisioners": [
@@ -27,6 +24,13 @@
         "sudo chown -R ec2-user:ec2-user /var/www/",
         "echo '<h1>Successfully provisioned Infra using Cloudformation, Jenkins and Packer.</h1>' > /var/www/html/index.html"
       ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true
     }
   ]
 }
