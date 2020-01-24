@@ -54,7 +54,7 @@ Resources:
         -
           Key: Name
           PropagateAtLaunch: true		  
-          Value: poc-instances	    
+          Value: charter-poc-instances	    
       AvailabilityZones:
         - "us-east-1c"
       LaunchConfigurationName: !Ref 'LaunchConfig'
