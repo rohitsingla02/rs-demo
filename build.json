@@ -1,0 +1,53 @@
+{
+  "variables": {
+    
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-1",
+      "source_ami": "ami-00068cd7555f543d5",
+      "instance_type": "t2.micro",
+      "ssh_username": "ec2-user",
+      "ami_name": "tomcat-ami-packer",
+      "name": "tomcat-ami"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+	"sudo yum update -y",
+	"sudo yum install java-1.8.0-openjdk.x86_64 -y",
+	"sudo yum install wget unzip -y",
+	"sudo wget http://apachemirror.wuchna.com/tomcat/tomcat-8/v8.5.50/bin/apache-tomcat-8.5.50.tar.gz",
+	"sudo wget https://raw.githubusercontent.com/sivakethineni/Charter-Demo-AMI-Creation/master/tomcat-users.xml",
+	"sudo wget https://raw.githubusercontent.com/sivakethineni/Charter-Demo-AMI-Creation/master/context.xml",
+	"sudo wget https://raw.githubusercontent.com/sivakethineni/Charter-Demo-AMI-Creation/master/tomcat",
+	"sudo adduser openkm",
+	"sudo tar -xvzf apache-tomcat-8.5.50.tar.gz",
+	"sleep 10",
+	"sudo mv apache-tomcat-8.5.50 /home/openkm",
+	"sudo chown -R openkm:openkm /home/openkm/apache-tomcat-8.5.50",
+	"sudo rm /home/openkm/apache-tomcat-8.5.50/conf/tomcat-users.xml",
+	"sudo rm /home/openkm/apache-tomcat-8.5.50/webapps/manager/META-INF/context.xml",
+	"sudo mv tomcat-users.xml /home/openkm/apache-tomcat-8.5.50/conf/",
+	"sudo mv context.xml /home/openkm/apache-tomcat-8.5.50/webapps/manager/META-INF/",
+	"sudo mv tomcat /etc/init.d/",
+	"sudo chmod 755 /etc/init.d/tomcat",
+	"sudo chkconfig --add tomcat",
+	"sudo chkconfig tomcat on",
+	"sudo service tomcat start",
+	"sudo yum install -y ruby",
+        "sudo yum install -y aws-cli",
+        "sudo wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
+        "sudo chmod +x ./install",
+        "sudo ./install auto",
+        "sudo chkconfig codedeploy-agent on",
+        "sudo service codedeploy-agent start"
+      ]
+    }
+  ]
+}
