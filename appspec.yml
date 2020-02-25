@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/openkm/apache-tomcat-8.5.50/webapps/
+    destination: /home/openkm/apache-tomcat-8.5.51/webapps/
 hooks:
   ApplicationStop:
     - location: scripts/stop_ser
