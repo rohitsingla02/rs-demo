@@ -13,7 +13,7 @@
 ECHO=/bin/echo
 TEST=/usr/bin/test
 TOMCAT_USER=openkm
-TOMCAT_HOME=/home/openkm/apache-tomcat-8.5.50
+TOMCAT_HOME=/home/openkm/apache-tomcat-8.5.51
 TOMCAT_START_SCRIPT=$TOMCAT_HOME/bin/startup.sh
 TOMCAT_STOP_SCRIPT=$TOMCAT_HOME/bin/shutdown.sh
  
