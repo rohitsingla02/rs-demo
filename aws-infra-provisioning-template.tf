@@ -8,7 +8,7 @@ provider "aws" {
 
 resource "aws_instance" "instance" {
 
-  ami = "ami-0a58581a892ec8554"
+  ami = "ami-018d8a3a5c21dfd01"
   instance_type = "t2.micro"
   key_name = "packer-infy-key"
   security_groups = ["packer-infysec-1"]
