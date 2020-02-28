@@ -12,7 +12,4 @@ resource "aws_instance" "instance" {
   instance_type = "t2.micro"
   key_name = "packer-infy-key"
   security_groups = ["packer-infysec-1"]
-  tags {
-    Name = "poc-instance"
-  }
 }
