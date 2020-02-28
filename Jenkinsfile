@@ -9,12 +9,12 @@ pipeline {
 
         stage('terraform started') {
             steps {
-                sh 'echo "Started...!" '
+                sh 'echo " Terraform Started...!" '
             }
         }
         stage('git clone') {
             steps {
-                sh 'sudo rm -r *;sudo git clone https://github.com/aleti-pavan/jenkins.git'
+                sh 'sudo rm -r *;sudo git clone https://github.com/rohitsingla02/rs-demo.git'
             }
         }
         stage('terraform init') {
@@ -29,7 +29,7 @@ pipeline {
         }
         stage('terraform ended') {
             steps {
-                sh 'echo "Ended....!!"'
+                sh 'echo " Terraform script Execution Ended....!!"'
             }
         }
 
