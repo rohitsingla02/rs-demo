@@ -13,6 +13,6 @@ resource "aws_instance" "instance" {
   key_name = "packer-infy-key"
   security_groups = ["packer-infysec-1"]
   tags = {
-    "Name"      = "Terraform-POC Instances"
+    "Name"      = "Terraform-poc-instances"
   }
 }
