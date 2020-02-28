@@ -11,5 +11,5 @@ resource "aws_instance" "instance" {
   ami = "ami-048868b0946c2c6f7"
   instance_type = "t2.micro"
   key_name = "packer-infy-key"
-  security_groups = "packer-infysec-1"
+  security_groups = ["packer-infysec-1"]
 }
