@@ -22,7 +22,7 @@
         "sudo chkconfig httpd on",
         "sudo service httpd start",
         "sudo chown -R ec2-user:ec2-user /var/www/",
-        "echo '<h1>Successfully provisioned Infra using Cloudformation, Jenkins and Packer.</h1>' > /var/www/html/index.html"
+        "echo '<h1> Successfully provisioned Infra using Terraform, Jenkins and Packer.</h1>' > /var/www/html/index.html"
       ]
     }
   ],
