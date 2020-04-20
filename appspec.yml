@@ -2,11 +2,8 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/openkm/apache-tomcat-8.5.51/webapps/
+    destination: /root/codedeploy-test/
 hooks:
-  ApplicationStop:
-    - location: scripts/stop_ser
-      timeout: 300
   ApplicationStart:
-    - location: scripts/start_ser
+    - location: scripts/start_ser_codedeploy
       timeout: 300
