@@ -1,9 +1,0 @@
-version: 0.0
-os: linux
-files:
-  - source: /
-    destination: /root/codedeploy-test/
-hooks:
-  ApplicationStart:
-    - location: scripts/start_ser_codedeploy
-      timeout: 300
