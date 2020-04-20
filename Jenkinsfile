@@ -27,8 +27,6 @@ pipeline {
                     step([
 							$class: 'AWSCodeDeployPublisher', 
 							applicationName: 'EC2-application-deployment', 
-							awsAccessKey: '${AWS_ACCESS_KEY_ID}', 
-							awsSecretKey: '${AWS_SECRET_KEY_ID}', 
 							credentials: 'aws-key-rs', 
 							deploymentConfig: 'CodeDeployDefault.OneAtATime', 
 							deploymentGroupAppspec: false, 
