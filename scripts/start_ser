@@ -1,1 +1,4 @@
-service tomcat start
+sudo su -
+for file in /root/codedeploy-test/*; do
+yes | cp -rf $file /root/test-deploy
+done
