@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        aws_access_key = "${params.aws_access_key_test}"
-        aws_secret_key = "${params.aws_secret_key_test}"
+        AWS_ACCESS_KEY_ID = "${params.aws_access_key_test}"
+        AWS_SECRET_KEY_ID = "${params.aws_secret_key_test}"
 
     }
 
@@ -27,8 +27,8 @@ pipeline {
                     step([
 							$class: 'AWSCodeDeployPublisher', 
 							applicationName: 'EC2-application-deployment', 
-							awsAccessKey: '${aws_access_key}', 
-							awsSecretKey: '${aws_secret_key}', 
+							awsAccessKey: '${AWS_ACCESS_KEY_ID}', 
+							awsSecretKey: '${AWS_SECRET_KEY_ID}', 
 							credentials: 'awsAccessKey', 
 							deploymentConfig: 'CodeDeployDefault.OneAtATime', 
 							deploymentGroupAppspec: false, 
