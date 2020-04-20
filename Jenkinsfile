@@ -16,14 +16,14 @@ pipeline {
         }
         stage('CD Configuration') {
             steps {
-                sh 'echo "${aws_access_key}" '
-		echo "${aws_access_key}"
+                sh 'echo "${AWS_ACCESS_KEY_ID}" '
+		echo "${AWS_ACCESS_KEY_ID}"
 		sh 'echo "CD Configuration post step" '
             }
             post {
                 always {
-			sh 'echo "${aws_access_key}" '
-			echo "${aws_access_key}"
+			sh 'echo "${AWS_ACCESS_KEY_ID}" '
+			echo "${AWS_ACCESS_KEY_ID}"
                     step([
 							$class: 'AWSCodeDeployPublisher', 
 							applicationName: 'EC2-application-deployment', 
