@@ -1,12 +1,5 @@
 pipeline {
     agent any
-
-    environment {
-        AWS_ACCESS_KEY_ID = "${params.aws_access_key_test}"
-        AWS_SECRET_KEY_ID = "${params.aws_secret_key_test}"
-
-    }
-
     stages {
 
         stage('CodeDeploy Plugin test') {
@@ -16,14 +9,10 @@ pipeline {
         }
         stage('CD Configuration') {
             steps {
-                sh 'echo "${AWS_ACCESS_KEY_ID}" '
-		echo "${AWS_ACCESS_KEY_ID}"
 		sh 'echo "CD Configuration post step" '
             }
             post {
                 always {
-			sh 'echo "${AWS_ACCESS_KEY_ID}" '
-			echo "${AWS_ACCESS_KEY_ID}"
                     step([
 							$class: 'AWSCodeDeployPublisher', 
 							applicationName: 'EC2-application-deployment', 
