@@ -1,48 +1,35 @@
 pipeline {
     agent any
-    stages {
 
+    environment {
+		RELEASE_VERSION = "s20.05" 
+		ENVIRONMENT_NAME = "sit"
+    }
+
+    stages {
+		stage('Download Artifacts test') {
+            steps {
+                sh 'echo " Download artifacts from artifactory test started...!" '
+            }
+        }
+		stage('Update aws ssm parameter test') {
+            steps {
+                sh 'echo " Download artifacts from artifactory test started...!" '
+                sh'''${env.RELEASE_VERSION}'''
+				env.ARTIFACTID_REPO=sh('${env.RELEASE_VERSION}/binaries/${env.ENVIRONMENT_NAME}')
+				sh 'echo "${env.ARTIFACTID_REPO}"'
+            }
+        }
         stage('CodeDeploy Plugin test') {
             steps {
                 sh 'echo " CodeDeploy Plugin test started...!" '
             }
         }
-        stage('CD Configuration') {
-            steps {
-		sh 'echo "CD Configuration post step" '
-            }
-            post {
-                always {
-                    step([
-							$class: 'AWSCodeDeployPublisher', 
-							applicationName: 'EC2-application-deployment', 
-							credentials: 'aws-key-rs', 
-							deploymentConfig: 'CodeDeployDefault.OneAtATime', 
-							deploymentGroupAppspec: false, 
-							deploymentGroupName: 'Charter-App-Deployment-EC2-Group', 
-							excludes: '', 
-							iamRoleArn: '', 
-							includes: '**', 
-							proxyHost: '', 
-							proxyPort: 0, 
-							region: 'us-east-1', 
-							s3bucket: 'application-deployment-rs-2020', 
-							s3prefix: 'ec2', 
-							subdirectory: '', 
-							versionFileName: '',
-							deploymentMethod: 'deploy',
-							pollingFreqSec: 15, 
-							pollingTimeoutSec: 300,			
-							waitForCompletion: true])
-                }
-            }
-        }
+
         stage('CD ended') {
             steps {
                 sh 'echo " CodeDeploy script Execution Ended....!!"'
             }
         }
-
-        
     }
 }
