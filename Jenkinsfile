@@ -25,7 +25,7 @@ pipeline {
             steps {
 				withAWS(credentials: 'aws-key-rs', region: 'us-east-1') {
 				echo "${env.ARTIFACTID_REPO}"
-				sh 'aws ssm put-parameter --name "hmno-nsl-scratch-artifact-id" --value "${env.ARTIFACTID_REPO}" --type String --overwrite'
+				sh 'aws ssm put-parameter --name "hmno-nsl-scratch-artifact-id" --value ${env.ARTIFACTID_REPO} --type String --overwrite'
 				}
 				echo "${env.ARTIFACTID_REPO}"
 				sh 'echo " CodeDeploy Plugin test started...!" '
