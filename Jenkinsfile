@@ -62,11 +62,7 @@ pipeline {
 							pollingTimeoutSec: 300,			
 							waitForCompletion: true])
                 }
-            }
-        }
-        stage('CD ended') {
-            steps {
-                sh 'echo " CodeDeploy script Execution Ended....!!"'
+				sh 'echo " CodeDeploy script Execution Ended....!!"'
             }
         }
     }
