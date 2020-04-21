@@ -4,7 +4,7 @@ pipeline {
     environment {
 		RELEASE_VERSION = "${params.release_ver}" 
 		ENVIRONMENT_NAME = "${params.env_deploy}"
-	    ARTIFACTORY_URL= "http://3.93.246.98:8081/artifactory/app-deplyment-artifacts-repo/"
+	    	ARTIFACTORY_URL= "http://3.93.246.98:8081/artifactory/app-deplyment-artifacts-repo/"
     }
 
     stages {
@@ -62,7 +62,11 @@ pipeline {
 							pollingTimeoutSec: 300,			
 							waitForCompletion: true])
                 }
-				sh 'echo " CodeDeploy script Execution Ended....!!"'
+            }
+        }
+        stage('Deployment Status') {
+            steps {
+                sh 'echo " Deployment is completed using CodeDeploy....!!"'
             }
         }
     }
