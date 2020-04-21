@@ -19,14 +19,14 @@ pipeline {
 				script {
 					env.ARTIFACTID_REPO="${env.RELEASE_VERSION}/binaries/${env.ENVIRONMENT_NAME}"
 				}
-				withAWS(credentials: 'aws-key-rs', region: 'us-east-1') {
-				echo "${env.ARTIFACTID_REPO}"
-				aws ssm put-parameter --name "hmno-nsl-scratch-artifact-id" --value ${env.ARTIFACTID_REPO} --type String --overwrite
-				}
 			}
 		}
         stage('CodeDeploy Plugin test') {
             steps {
+				withAWS(credentials: 'aws-key-rs', region: 'us-east-1') {
+				echo "${env.ARTIFACTID_REPO}"
+				sh 'aws ssm put-parameter --name "hmno-nsl-scratch-artifact-id" --value ${env.ARTIFACTID_REPO} --type String --overwrite'
+				}
 				echo "${env.ARTIFACTID_REPO}"
 				sh 'echo " CodeDeploy Plugin test started...!" '
             }
