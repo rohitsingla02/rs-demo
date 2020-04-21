@@ -12,7 +12,12 @@ pipeline {
                 sh 'echo " Download artifacts from artifactory test started...!" '
 				echo "${env.RELEASE_VERSION}"
 				echo "${env.ENVIRONMENT_NAME}"
-            }
+				echo "${WORKSPACE}"
+				echo "${env.WORKSPACE}"
+				sh'''
+                curl -u admin:password http://3.93.246.98:8081/artifactory/app-deplyment-artifacts-repo/ -o ${WORKSPACE}/
+                '''
+				}
         }
 		stage('Update aws ssm parameter test') {
 		    steps {
@@ -25,7 +30,7 @@ pipeline {
             steps {
 				withAWS(credentials: 'aws-key-rs', region: 'us-east-1') {
 				echo "${env.ARTIFACTID_REPO}"
-				sh 'aws ssm put-parameter --name "hmno-nsl-scratch-artifact-id" --value "s20.05/binaries/preprod" --type String --overwrite'
+				sh 'aws ssm put-parameter --name "hmno-nsl-scratch-artifact-id" --value ${env.ARTIFACTID_REPO} --type String --overwrite'
 				}
 				echo "${env.ARTIFACTID_REPO}"
 				sh 'echo " CodeDeploy Plugin test started...!" '
