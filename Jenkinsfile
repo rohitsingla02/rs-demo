@@ -9,7 +9,8 @@ pipeline {
     stages {
 		stage('Download Artifacts test') {
             steps {
-                sh 'echo " Download artifacts from artifactory test started...!" '
+                    sh 'rm -rf *'
+		    sh 'echo " Download artifacts from artifactory test started...!" '
 				echo "${env.RELEASE_VERSION}"
 				echo "${env.ENVIRONMENT_NAME}"
 				echo "${WORKSPACE}"
