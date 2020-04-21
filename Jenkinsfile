@@ -15,10 +15,12 @@ pipeline {
             }
         }
 		stage('Update aws ssm parameter test') {
-            script {
-				env.ARTIFACTID_REPO=sh('${env.RELEASE_VERSION}/binaries/${env.ENVIRONMENT_NAME}')
-            }
-        }
+		    steps {
+				script {
+					env.ARTIFACTID_REPO=sh('${env.RELEASE_VERSION}/binaries/${env.ENVIRONMENT_NAME}')
+				}
+			}
+		}
         stage('CodeDeploy Plugin test') {
             steps {
                 sh 'echo "${env.ARTIFACTID_REPO}"'
