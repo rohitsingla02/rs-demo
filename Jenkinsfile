@@ -10,7 +10,8 @@ pipeline {
 		stage('Download Artifacts test') {
             steps {
                 sh 'echo " Download artifacts from artifactory test started...!" '
-				sh 'echo "${env.RELEASE_VERSION}"'
+				echo "${env.RELEASE_VERSION}"
+				echo "${env.ENVIRONMENT_NAME}"
             }
         }
 		stage('Update aws ssm parameter test') {
