@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-		RELEASE_VERSION = 's20.05' 
-		ENVIRONMENT_NAME = 'sit'
+		RELEASE_VERSION = '${params.release_ver}' 
+		ENVIRONMENT_NAME = '${params.env_deploy}'
     }
 
     stages {
