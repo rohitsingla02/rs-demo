@@ -2,15 +2,14 @@ pipeline {
     agent any
 
     environment {
-		RELEASE_VERSION = "s20.05" 
-		ENVIRONMENT_NAME = "sit"
+		RELEASE_VERSION = 's20.05' 
+		ENVIRONMENT_NAME = 'sit'
     }
 
     stages {
 		stage('Download Artifacts test') {
             steps {
                 sh 'echo " Download artifacts from artifactory test started...!" '
-				sh 'echo " Download artifacts from artifactory test started...!" '
 				sh 'echo "${env.RELEASE_VERSION}"'
             }
         }
