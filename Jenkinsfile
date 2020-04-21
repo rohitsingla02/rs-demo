@@ -15,8 +15,8 @@ pipeline {
 				echo "${WORKSPACE}"
 				echo "${env.WORKSPACE}"
 				sh'''
-                curl -u admin:password http://3.93.246.98:8081/artifactory/app-deplyment-artifacts-repo/user.war -o ${WORKSPACE}/user-temp.war
-                '''
+		                wget -r --no-parent -nH --cut-dirs=1 --reject "index.html*" http://3.93.246.98:8081/artifactory/app-deplyment-artifacts-repo/
+                		'''
 				}
         }
 		stage('Update aws ssm parameter test') {
