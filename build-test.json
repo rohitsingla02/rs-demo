@@ -1,0 +1,69 @@
+{
+  "variables": {
+    
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "us-east-1",
+      "source_ami": "ami-00068cd7555f543d5",
+      "instance_type": "t2.micro",
+      "ssh_username": "ec2-user",
+      "ami_name": "tomcat-ami-packer",
+      "name": "tomcat-ami"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+	"sudo yum update -y",
+	"sudo yum install java-1.8.0-openjdk.x86_64 -y",
+	"sudo yum install wget unzip -y",
+	"sudo wget http://apachemirror.wuchna.com/tomcat/tomcat-8/v8.5.51/bin/apache-tomcat-8.5.51.tar.gz",
+	"sudo wget https://raw.githubusercontent.com/rohitsingla02/rs-demo/master/tomcat-users.xml",
+	"sudo wget https://raw.githubusercontent.com/rohitsingla02/rs-demo/master/context.xml",
+	"sudo wget https://raw.githubusercontent.com/rohitsingla02/rs-demo/master/tomcat",
+	"sudo adduser openkm",
+	"sudo tar -xvzf apache-tomcat-8.5.51.tar.gz",
+	"sleep 10",
+	"sudo mv apache-tomcat-8.5.51 /home/openkm",
+	"sudo chown -R openkm:openkm /home/openkm/apache-tomcat-8.5.51",
+	"sudo rm /home/openkm/apache-tomcat-8.5.51/conf/tomcat-users.xml",
+	"sudo rm /home/openkm/apache-tomcat-8.5.51/webapps/manager/META-INF/context.xml",
+	"sudo mv tomcat-users.xml /home/openkm/apache-tomcat-8.5.51/conf/",
+	"sudo mv context.xml /home/openkm/apache-tomcat-8.5.51/webapps/manager/META-INF/",
+	"sudo mv tomcat /etc/init.d/",
+	"sudo chmod 755 /etc/init.d/tomcat",
+	"sudo chkconfig --add tomcat",
+	"sudo chkconfig tomcat on",
+	"sudo service tomcat start",
+	"sudo yum install -y ruby",
+        "sudo yum install -y aws-cli",
+        "sudo wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
+        "sudo chmod +x ./install",
+        "sudo ./install auto",
+        "sudo chkconfig codedeploy-agent on",
+        "sudo service codedeploy-agent start",
+		"sudo wget https://assets.nagios.com/downloads/nagiosxi/agents/linux-nrpe-agent.tar.gz",
+        "sudo tar -xzf linux-nrpe-agent.tar.gz",
+	    "sleep 10",
+        "sudo ./linux-nrpe-agent/fullinstall",
+        "sudo rm -rf linux-nrpe-agent.tar.gz linux-nrpe-agent",
+		"sudo wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm",
+        "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
+		"sleep 10",
+        "sudo rm -rf amazon-cloudwatch-agent.rpm"	
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true
+    }
+  ]
+}
