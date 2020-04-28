@@ -17,6 +17,11 @@
   ],
   "provisioners": [
     {
+      "type": "file",
+      "source": "cloudwatch.json",
+      "destination": "/tmp/"
+    },
+    {
       "type": "shell",
       "inline": [
 	"sudo yum update -y",
@@ -41,25 +46,23 @@
 	"sudo chkconfig tomcat on",
 	"sudo service tomcat start",
 	"sudo yum install -y ruby",
-	"sudo yum install gcc",
+	"sudo yum install -y gcc",
         "sudo yum install -y aws-cli",
         "sudo wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
         "sudo chmod +x ./install",
         "sudo ./install auto",
         "sudo chkconfig codedeploy-agent on",
         "sudo service codedeploy-agent start",
-	"sudo wget http://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/2.0.10/zabbix-2.0.10.tar.gz",
-        "sudo tar -xzvf zabbix-2.0.10.tar.gz",
-	"sleep 10",
-        "sudo  ./configure –enable-agent",
-	"sudo make install",
-        "sleep 30",
-	"sudo ./usr/local/sbin/zabbix_agentd", 
-	"sleep 10",
+	"sudo rpm -Uvh https://repo.zabbix.com/zabbix/4.4/rhel/8/x86_64/zabbix-release-4.4-1.el8.noarch.rpm",
+	"sudo yum install -y zabbix-agent",
+	"sudo service zabbix-agent start",
+	"sudo chkconfig zabbix-agent on",
         "sudo wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm",
         "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
         "sleep 10",
-        "sudo rm -rf amazon-cloudwatch-agent.rpm"	
+        "sudo rm -rf amazon-cloudwatch-agent.rpm",
+        "sudo cp /tmp/cloudwatch.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/cloudwatch.json",
+	"sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/cloudwatch.json -s"
       ]
     }
   ],
