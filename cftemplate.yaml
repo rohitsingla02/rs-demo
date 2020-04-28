@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Business Usecase- CF will use Packer AMI to provision infra - the AWS resources i.e EC2/ELB/ASG. Entire process of Infrastructure build will be orchestrated through the Jenkins. 
+  This automation will take care of setting up security groups, policies. Technical description- Jenkins job will trigger the AWS CF template in.yaml format placed in GitHub. It will automatically orchestrate the infra provisioning.
+Parameters:
+#Using Jenkins-Packer created private AMI ID with Apache installed
+  ImageId:
+    Description: EC2 instance type..Provide base AMI or Packer AMI reference
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: packer-apache-ami-id
+  InstanceType:
+    Description:  EC2 instance type
+    Type: String
+    Default: t2.small
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small 
+      - t2.medium	  
+  AvailabilityZone:
+    Description: EC2 Availability Zone
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-east-1c
+    AllowedValues:
+      - us-east-1a
+      - us-east-1b
+      - us-east-1c	  
+  KeyName:
+    Description: Provide Existing keypair name.
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: rajesh-key-pair
+  
+  SecurityGroupIds:
+    Type: AWS::EC2::SecurityGroup::Id
+    Default: sg-0bee687735f5ada3c
+
+  BucketName:
+    Description: The Name and Tag to be given to the bucket. Should start with digitalx-
+    Type: String
+    Default: "charter-app-deliverables"
+
+  Retention:
+    Description: The Retention to be given to the versions of each object on the bucket
+    Default: 30
+    Type: String
+   
+Resources:
+#  InstanceGroup: ASG automatically spins up desired capacity of EC2 instances with defined launch configuration. 
+#  Create Autoscaling group in specific AZ, with minimum instances/servers as 2, max 4 and desired as 3. Launch configuration is provided and ELB is attached.
+  InstanceGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      Tags:
+        -
+          Key: Name
+          PropagateAtLaunch: true		  
+          Value: poc-instances	    
+      AvailabilityZones:
+        - "us-east-1c"
+      LaunchConfigurationName: !Ref 'LaunchConfig'
+      MinSize: '1'
+      MaxSize: '2'
+      DesiredCapacity: '2'
+      LoadBalancerNames: [!Ref 'LoadBalancer']
+#  ServerScaleUpPolicy and ServerScaleDownPolicy: This will scale-out(increase) or scale-in(decrease) EC2 instances/servers based on defined scaling policies referring to CPU threshold usage.
+  ServerScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref 'InstanceGroup'
+      Cooldown: '60'
+      ScalingAdjustment: 1
+      
+  ServerScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref 'InstanceGroup'
+      Cooldown: '60'
+      ScalingAdjustment: -1
+      
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-up if CPU > 70% for 2 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 120
+      EvaluationPeriods: 1
+      Threshold: 70
+      AlarmActions: [!Ref 'ServerScaleUpPolicy']
+      Dimensions:
+      - Name: AutoScalingGroupName
+        Value: !Ref 'InstanceGroup'
+      ComparisonOperator: GreaterThanThreshold
+      
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-down if CPU < 30% for 2 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 120
+      EvaluationPeriods: 1
+      Threshold: 30
+      AlarmActions: [!Ref 'ServerScaleDownPolicy']
+      Dimensions:
+      - Name: AutoScalingGroupName
+        Value: !Ref 'InstanceGroup'
+      ComparisonOperator: LessThanThreshold
+      
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      KeyName: !Ref 'KeyName'
+      ImageId: !Ref ImageId
+      InstanceType: !Ref 'InstanceType'
+      IamInstanceProfile: !Ref IAMInstanceProfile
+      SecurityGroups:
+        - !Ref SecurityGroupIds
+# ELB- On-the-fly, Elastic load balancer will be created and attached to ASG EC2 instances. 
+# ELB DNS will be available to end-user and will not expose the application server (Ec2 servers) directly. ELB will monitor health of the instances based on defined checks			
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      AvailabilityZones:
+        - "us-east-1c"
+      CrossZone: 'true'
+      SecurityGroups:
+        - Fn::GetAtt: [ LBSecurityGroup, GroupId ]
+      Listeners:
+        - LoadBalancerPort: '80'
+          InstancePort: '80'
+          Protocol: HTTP
+      HealthCheck:
+          Target: HTTP:80/index.html
+          HealthyThreshold: '3'
+          UnhealthyThreshold: '5'
+          Interval: '30'
+          Timeout: '5'
+      ConnectionDrainingPolicy:
+          Enabled: 'true'
+          Timeout: '300'
+          
+  LBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access and HTTP access on the configured port
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 0.0.0.0/0
+ 
+ #Create Shared S3 Bucket
+  S3BucketTemplate:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      LifecycleConfiguration:
+        Rules:
+          - Id: !Ref BucketName
+            NoncurrentVersionExpirationInDays: !Ref Retention
+            Status: Enabled
+      Tags:
+        - Key: Name
+          Value: !Sub ${BucketName}-bucket
+        - Key: Resource
+          Value: 's3-bucket'
+  IAMInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Ref AWS::StackName
+      Path: "/"
+      Roles:
+        - !Ref InstanceRole
+
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy

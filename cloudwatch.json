@@ -1,0 +1,41 @@
+{
+  "agent": {
+    "run_as_user": "root",
+    "region": "us-east-1"
+  },
+  "metrics": {
+    "append_dimensions": {
+      "InstanceId": "${aws:InstanceId}"
+    },
+    "metrics_collected": {
+      "disk": {
+        "resources": [
+          "/"
+        ],
+        "measurement": [
+          "used_percent"
+        ],
+        "ignore_file_system_types": [
+          "tmpfs", "xfs"
+        ],
+        "metrics_collection_interval": 60
+      },
+      "mem": {
+        "measurement": [
+          "used_percent",
+          "available_percent",
+          "available"
+        ],
+        "metrics_collection_interval": 60
+      },
+      "cpu:": {
+        "measurement": [
+          "usage_active",
+          "usage_system",
+          "usage_user"
+        ],
+        "metrics_collection_interval": 60
+      }
+    }
+  }
+}
