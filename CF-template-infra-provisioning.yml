@@ -28,7 +28,7 @@ Parameters:
   KeyName:
     Description: Provide Existing keypair name.
     Type: AWS::EC2::KeyPair::KeyName
-    Default: packer-infy-key
+    Default: rajesh-key-pair
   
   SecurityGroupIds:
     Type: AWS::EC2::SecurityGroup::Id
@@ -54,13 +54,13 @@ Resources:
         -
           Key: Name
           PropagateAtLaunch: true		  
-          Value: charter-poc-instances	    
+          Value: poc-instances	    
       AvailabilityZones:
         - "us-east-1c"
       LaunchConfigurationName: !Ref 'LaunchConfig'
-      MinSize: '2'
-      MaxSize: '4'
-      DesiredCapacity: '3'
+      MinSize: '1'
+      MaxSize: '2'
+      DesiredCapacity: '2'
       LoadBalancerNames: [!Ref 'LoadBalancer']
 #  ServerScaleUpPolicy and ServerScaleDownPolicy: This will scale-out(increase) or scale-in(decrease) EC2 instances/servers based on defined scaling policies referring to CPU threshold usage.
   ServerScaleUpPolicy:
@@ -117,6 +117,7 @@ Resources:
       KeyName: !Ref 'KeyName'
       ImageId: !Ref ImageId
       InstanceType: !Ref 'InstanceType'
+      IamInstanceProfile: !Ref IAMInstanceProfile
       SecurityGroups:
         - !Ref SecurityGroupIds
 # ELB- On-the-fly, Elastic load balancer will be created and attached to ASG EC2 instances. 
@@ -172,3 +173,27 @@ Resources:
           Value: !Sub ${BucketName}-bucket
         - Key: Resource
           Value: 's3-bucket'
+  IAMInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Ref AWS::StackName
+      Path: "/"
+      Roles:
+        - !Ref InstanceRole
+
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
